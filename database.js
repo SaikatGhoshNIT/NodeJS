@@ -20,7 +20,7 @@ const connectToDatabase = async () => {
         console.log('Data from collection:', data);
 
         //Delete the data from the collection
-        const deleteResult = await collection.deleteMany({ _id: "682a0176d6ba9402db4f789e" });
+        const deleteResult = await collection.deleteMany({ _id: "682a0176d6ba9402db4f789e" }); 
         if (deleteResult.deletedCount === 0) {
             console.log('No documents matched the query. Deleted 0 documents.');
         } else {
