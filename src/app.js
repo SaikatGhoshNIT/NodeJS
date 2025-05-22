@@ -5,6 +5,24 @@ port = 7777;
 
 //!Order of middleware (routes) matters
 
+app.use('/express', (req, res, next) => { //multiple middleware functions can be used for a single route.
+    console.log('Middleware for /express route');
+    next(); //next is a function that passes control to the next middleware function.
+}, [(req, res,next) => {
+    res.send('Hello from /express route');
+    next();
+},
+(req, res) => {
+    console.log('This will not be executed because the response has already been sent.');
+}]
+);
+
+app.get("/user", (req, res) => { //get is a method to handle GET requests.
+    //res.send(`Hello from API GETAPI_ID ${req.query}`);
+    console.log(req.query); //params is an object that contains the route parameters.
+    //res.send(`Hello from API GET with id ${req.params.id}`);
+});
+
 app.use("/api", (req, res) => { //use is a method to handle all HTTP methods.
     res.send('Hello from API');
 });
@@ -13,6 +31,7 @@ app.get("/getapi", (req, res) => { //get is a method to handle GET requests.
     res.send('Hello from API GET');
 });
 
+
 app.post("/postapi", (req, res) => { //post is a method to handle POST requests.
     //We can write logic here to POST data to the server.
     res.send('Hello from API POST');
@@ -20,7 +39,7 @@ app.post("/postapi", (req, res) => { //post is a method to handle POST requests.
 
 app.use("/",(req, res)=>{
     res.send('Hello World');
-}) // if the first middleware ("/") matches all routes, including /api, so the /api handler is never reached.
+}) // if the first middleware ("/") matches all routes, including /api, so the /api handler will never reached.
 
 
 app.listen(port, () => {
