@@ -1,8 +1,8 @@
 const express = require('express');
 const app = express();
 
-const {adminAuth} = require('./middlewares/auth'); // Import the adminAuth middleware
-const {userAuth} = require('./middlewares/auth'); // Import the userAuth middleware
+const {adminAuth, userAuth} = require('./middlewares/auth'); // Import the adminAuth middleware
+//const {userAuth} = require('./middlewares/auth'); // Import the userAuth middleware
 
 port = 7777;
 
