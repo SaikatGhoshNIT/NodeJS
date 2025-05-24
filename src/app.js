@@ -1,11 +1,29 @@
 const express = require('express');
 const app = express();
+const { connectToDatabase } = require('./db'); 
 
-const {adminAuth, userAuth} = require('./middlewares/auth'); // Import the adminAuth middleware
+//const {adminAuth, userAuth} = require('./middlewares/auth'); // Import the adminAuth middleware
 //const {userAuth} = require('./middlewares/auth'); // Import the userAuth middleware
 
 port = 7777;
 
+connectToDatabase()
+.then(() => {
+    console.log('Connected to MongoDB');
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    });
+})
+.catch(error  => {
+    console.error('Error connecting to MongoDB:', error);
+})
+
+
+
+
+
+
+/*
 //!Order of middleware (routes) matters the most.
 //! Middleware functions are executed in the order they are defined.
 
@@ -63,7 +81,7 @@ app.use('/express', (req, res, next) => { //multiple middleware functions can be
     console.log('This will not be executed because the response has already been sent.');
 }]
 );
-/*
+
 app.get("/user", (req, res) => {
     res.send('Hello from User');
     //res.send(`Hello from API GETAPI_ID ${req.query}`);
@@ -88,8 +106,9 @@ app.post("/postapi", (req, res) => { //post is a method to handle POST requests.
 app.use("/",(req, res)=>{
     res.send('Hello World');
 }) // if the first middleware ("/") matches all routes, including /api, so the /api handler will never reached.
-*/
+
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+*/
