@@ -9,7 +9,29 @@ port = 7777;
 //!Order of middleware (routes) matters the most.
 //! Middleware functions are executed in the order they are defined.
 
-// Handle authentication middleware for simplify the code.
+//! Error handling middleware
+app.get('/getUserData', (req, res) => {
+    try {
+        //Simulating an error
+       throw new Error('Something went wrong while fetching user data');
+       res.send('Hello from User Data');
+    }
+    catch(err){
+        res.status(500).send("There is an error in your code");
+    }
+})
+
+app.use("/",(err, req, res, next) => {
+    if(err){
+        //Log the error
+        res.status(500).send("Something went wrong in the server");
+    }
+    else{
+        res.send('Hello World');    
+    }
+})
+
+//! Handle authentication middleware for simplify the code.
 app.use("/admin", adminAuth);
 
 // Handle admin routes
@@ -29,7 +51,7 @@ app.get("/user/data", userAuth, (req, res) => { //! if we dont's have any child 
     //res.send(`Hello from API GET with id ${req.params.id}`);
 });
 
-
+//! multiple middleware functions can be used for a single route.
 app.use('/express', (req, res, next) => { //multiple middleware functions can be used for a single route.
     console.log('Middleware for /express route');
     next(); //next is a function that passes control to the next middleware function.
@@ -41,7 +63,7 @@ app.use('/express', (req, res, next) => { //multiple middleware functions can be
     console.log('This will not be executed because the response has already been sent.');
 }]
 );
-
+/*
 app.get("/user", (req, res) => {
     res.send('Hello from User');
     //res.send(`Hello from API GETAPI_ID ${req.query}`);
@@ -66,7 +88,7 @@ app.post("/postapi", (req, res) => { //post is a method to handle POST requests.
 app.use("/",(req, res)=>{
     res.send('Hello World');
 }) // if the first middleware ("/") matches all routes, including /api, so the /api handler will never reached.
-
+*/
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
