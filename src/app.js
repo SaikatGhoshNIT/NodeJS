@@ -1,24 +1,16 @@
 const express = require('express');
 const app = express();
 
+const {adminAuth} = require('./middlewares/auth'); // Import the adminAuth middleware
+const {userAuth} = require('./middlewares/auth'); // Import the userAuth middleware
+
 port = 7777;
 
 //!Order of middleware (routes) matters the most.
 //! Middleware functions are executed in the order they are defined.
 
 // Handle authentication middleware for simplify the code.
-app.use("/admin", (req, res, next) => {
-    //const token = req.headers['authorization']; //get the token from the request headers.
-    console.log("Admin auth is getting checked...");
-    
-    const token = "xyz";
-    if (token === 'valid-token') { //check if the token is valid.
-        next(); //if the token is valid, pass control to the next middleware function.
-    } else {
-        res.status(401).send('Unauthorized'); //if the token is not valid, send a 401 Unauthorized response.
-    }
-    // Here you can add logic to check if the user is authenticated
-});
+app.use("/admin", adminAuth);
 
 // Handle admin routes
 app.get("/admin/getAllData", (req, res) => {
@@ -30,7 +22,12 @@ app.delete("/admin/deleteData", (req, res) => {
 });
 
 
-
+app.get("/user/data", userAuth, (req, res) => { //! if we dont's have any child routes, we can use the middleware directly in the route. Where userAuth will be executed before the route handler.
+    res.send('Hello from User');
+    //res.send(`Hello from API GETAPI_ID ${req.query}`);
+    //console.log(req.query); //params is an object that contains the route parameters.
+    //res.send(`Hello from API GET with id ${req.params.id}`);
+});
 
 
 app.use('/express', (req, res, next) => { //multiple middleware functions can be used for a single route.
@@ -45,7 +42,8 @@ app.use('/express', (req, res, next) => { //multiple middleware functions can be
 }]
 );
 
-app.get("/user", (req, res) => { //get is a method to handle GET requests.
+app.get("/user", (req, res) => {
+    res.send('Hello from User');
     //res.send(`Hello from API GETAPI_ID ${req.query}`);
     console.log(req.query); //params is an object that contains the route parameters.
     //res.send(`Hello from API GET with id ${req.params.id}`);
