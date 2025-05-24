@@ -3,7 +3,35 @@ const app = express();
 
 port = 7777;
 
-//!Order of middleware (routes) matters
+//!Order of middleware (routes) matters the most.
+//! Middleware functions are executed in the order they are defined.
+
+// Handle authentication middleware for simplify the code.
+app.use("/admin", (req, res, next) => {
+    //const token = req.headers['authorization']; //get the token from the request headers.
+    console.log("Admin auth is getting checked...");
+    
+    const token = "xyz";
+    if (token === 'valid-token') { //check if the token is valid.
+        next(); //if the token is valid, pass control to the next middleware function.
+    } else {
+        res.status(401).send('Unauthorized'); //if the token is not valid, send a 401 Unauthorized response.
+    }
+    // Here you can add logic to check if the user is authenticated
+});
+
+// Handle admin routes
+app.get("/admin/getAllData", (req, res) => {
+    res.send('Hello from Admin');
+});
+
+app.delete("/admin/deleteData", (req, res) => {
+    res.send('Hello from Admin DELETE');
+});
+
+
+
+
 
 app.use('/express', (req, res, next) => { //multiple middleware functions can be used for a single route.
     console.log('Middleware for /express route');
