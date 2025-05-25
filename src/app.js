@@ -23,7 +23,7 @@ connectToDatabase()
 
 
 
-/*
+
 //!Order of middleware (routes) matters the most.
 //! Middleware functions are executed in the order they are defined.
 
@@ -48,7 +48,7 @@ app.use("/",(err, req, res, next) => {
         res.send('Hello World');    
     }
 })
-
+/*
 //! Handle authentication middleware for simplify the code.
 app.use("/admin", adminAuth);
 
