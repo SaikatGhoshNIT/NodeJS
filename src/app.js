@@ -1,11 +1,47 @@
 const express = require('express');
 const app = express();
-const { connectToDatabase } = require('./db'); 
+const { connectToDatabase } = require('./db.js'); 
+
+const User = require('./models/user.js');
 
 //const {adminAuth, userAuth} = require('./middlewares/auth'); // Import the adminAuth middleware
 //const {userAuth} = require('./middlewares/auth'); // Import the userAuth middleware
 
 port = 7777;
+
+// Middleware to parse JSON bodies
+app.post('/signUp', async(req, res) => {
+
+const user = new User({
+    firstName: 'Lipi',
+    lastName: 'Ghosh',
+    email: 'lipi.mondal.77@gmail.com',
+    password: 'lipighosh5434',
+    age: 25,
+    gender: "Female",
+    });
+    /*user.save().then((user) => {
+        console.log('User saved successfully:', user);
+        res.send('User signed up successfully');
+    }).catch((error) => {
+        console.error('Error saving user:', error);
+        res.status(400).send('Error signing up user');
+    });*/
+
+    try{
+        await user.save();
+        console.log('User saved successfully:', user);
+        res.send('User signed up successfully');
+    }
+    catch(error) {
+        console.error('Error saving user:', error);
+        res.status(400).send('Error signing up user');
+    }
+
+    
+
+
+});
 
 connectToDatabase()
 .then(() => {
@@ -23,7 +59,7 @@ connectToDatabase()
 
 
 
-
+/*
 //!Order of middleware (routes) matters the most.
 //! Middleware functions are executed in the order they are defined.
 
@@ -48,7 +84,7 @@ app.use("/",(err, req, res, next) => {
         res.send('Hello World');    
     }
 })
-/*
+
 //! Handle authentication middleware for simplify the code.
 app.use("/admin", adminAuth);
 
