@@ -9,17 +9,20 @@ const User = require('./models/user.js');
 
 port = 7777;
 
+app.use(express.json()); // Middleware to parse JSON bodies given by Express.
+
 // Middleware to parse JSON bodies
 app.post('/signUp', async(req, res) => {
 
-const user = new User({
-    firstName: 'Lipi',
+const user = new User(req.body
+    /*{firstName: 'Lipi',
     lastName: 'Ghosh',
     email: 'lipi.mondal.77@gmail.com',
     password: 'lipighosh5434',
     age: 25,
-    gender: "Female",
-    });
+    gender: "Female",}*/
+    );
+
     /*user.save().then((user) => {
         console.log('User saved successfully:', user);
         res.send('User signed up successfully');
@@ -37,11 +40,41 @@ const user = new User({
         console.error('Error saving user:', error);
         res.status(400).send('Error signing up user');
     }
-
-    
-
-
 });
+
+// Get user data
+app.get("/userdata", async (req, res) =>{
+    const userEmail = req.body.email;
+
+    try{
+        const userdata = await User.find({email : userEmail});
+        if(userdata.length >0){
+            res.send(userdata);
+        }
+        res.status(404).send('User not found');
+    }catch(error) {
+        console.error('Error fetching user data:', error);
+        res.status(500).send('Error fetching user data');
+    }
+})
+
+app.get("/feed", async (req, res) =>{
+    const userEmail = req.body.email;
+
+    try{
+        const userdata = await User.find({email : userEmail});
+        if(userdata.length >0){
+            res.send(userdata);
+        }
+        res.status(404).send('User not found');
+    }catch(error) {
+        console.error('Error fetching user data:', error);
+        res.status(500).send('Error fetching user data');
+    }
+})
+
+
+
 
 connectToDatabase()
 .then(() => {
