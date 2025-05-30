@@ -38,7 +38,7 @@ const user = new User(req.body
     }
     catch(error) {
         console.error('Error saving user:', error);
-        res.status(400).send('Error signing up user');
+        res.status(400).send('Error signing up user: '+ error.message);
     }
 });
 
@@ -73,7 +73,36 @@ app.get("/feed", async (req, res) =>{
     }
 })
 
+app.delete("/deleteUser", async (req, res) => {
+    const userEmail = req.body.email;
 
+    try{
+        const result = await User.findOneAndDelete({email : userEmail});
+        if(result.length === 0) {
+            return res.status(404).send('User not found');
+        }
+        console.log(result);
+        res.send(`User with email ${userEmail} deleted successfully`);
+    } catch(error) {
+        console.error('Error deleting user:', error);       
+        res.status(400).send('Error deleting user');
+    }
+})
+
+app.patch("/updateUser", async (req, res) =>{
+    const userEmail = req.body.email;
+    const userid = req.body.id;
+    const data = req.body;
+    try{
+        await User.findByIdAndUpdate({_id : userid},{email : userEmail}, {runValidators: true}); // runValidators: true will ensure that the update operation will validate the data against the schema.
+        //1016console.log('Update Data:', updateData);
+        res.status(200).send(`User with email ${userEmail} updated successfully`);
+    }
+    catch(error) {
+        console.error('Error updating user:', error);   
+        res.status(400).send('Error updating user');
+    }
+}) 
 
 
 connectToDatabase()

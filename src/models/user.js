@@ -16,8 +16,17 @@ const userSchema = new Schema ({
     },
     age : Number, 
     gender : {
-        type : String
-    }
+        type : String,
+        validate(value){
+            if(!["male", "female"].includes(value.toLowerCase())) {
+                throw new Error ("Gender must be either Male or Female")
+            }
+        }
+    },
+    skills : [String]
+},
+{
+    timestamps: true // Automatically adds createdAt and updatedAt fields
 })
 
 module.exports = mongoose.model("User", userSchema);
