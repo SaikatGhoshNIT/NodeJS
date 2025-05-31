@@ -1,5 +1,5 @@
 const {mongoose} = require('mongoose');
-const validator = require('validator'); // Import validator for email validation (NPM package)
+const validator = require('validator'); // Import validator for validation (NPM package)
 
 const {Schema} = mongoose;
 
@@ -28,7 +28,7 @@ const userSchema = new Schema ({
         unique : true,
         trim : true,
         validate(value) {
-            if(value.length < 6) {
+            if(!validator.isStrongPassword(value, { minLength: 6 })) {
                 throw new Error("Password must be at least 6 characters long");
             }
         }
