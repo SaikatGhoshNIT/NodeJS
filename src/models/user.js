@@ -1,4 +1,5 @@
 const {mongoose} = require('mongoose');
+const validator = require('validator'); // Import validator for email validation (NPM package)
 
 const {Schema} = mongoose;
 
@@ -10,10 +11,13 @@ const userSchema = new Schema ({
         required : true,
         unique : true,
         trim : true,
-        // Validate email format using a regular expression 
+        // Validate email format
         validate(value) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            /*const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if(!emailRegex.test(value)) {
+                throw new Error("Invalid email format");
+            }*/
+            if(!validator.isEmail(value)) {
                 throw new Error("Invalid email format");
             }
         }
