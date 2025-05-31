@@ -89,18 +89,35 @@ app.delete("/deleteUser", async (req, res) => {
     }
 })
 
-app.patch("/updateUser", async (req, res) =>{
-    const userEmail = req.body.email;
-    const userid = req.body.id;
+app.patch("/updateUser/:id", async (req, res) =>{
+    //const userEmail = req.body.email;
+    const userid = req.params?.id; //We should use req.params to get the route parameters, and UserID should not get updated in the request body, it should be passed as a route parameter.
     const data = req.body;
+
     try{
-        await User.findByIdAndUpdate({_id : userid},{email : userEmail}, {runValidators: true}); // runValidators: true will ensure that the update operation will validate the data against the schema.
-        //1016console.log('Update Data:', updateData);
-        res.status(200).send(`User with email ${userEmail} updated successfully`);
+    //! Validate the update fields
+    const allowedUpdates = ['password', 'age', 'skills', 'firstName', 'lastName', "gender"];
+
+    const isUpdateAllowed = Object.keys(data).every((key)=>{
+        return allowedUpdates.includes(key);
+    })
+
+    console.log(isUpdateAllowed);
+    
+    if(!isUpdateAllowed) {
+        //return res.status(400).send('Invalid update fields');
+        throw new Error('Invalid update fields');
+    }
+    /*if(data.skills.length > 5) {
+        throw new Error('Skills cannot be more than 5');
+    }*/
+        //await User.findByIdAndUpdate({_id : userid},{email : userEmail}, {runValidators: true}); // runValidators: true will ensure that the update operation will validate the data against the schema.
+        await User.findByIdAndUpdate({_id : userid},data, {runValidators: true});
+        res.status(200).send(`User data updated successfully`);
     }
     catch(error) {
         console.error('Error updating user:', error);   
-        res.status(400).send('Error updating user');
+        res.status(400).send('Error updating user' + error.message);
     }
 }) 
 

@@ -8,13 +8,38 @@ const userSchema = new Schema ({
     email : { // Email is a required field and must be unique
         type : String,
         required : true,
-        unique : true
+        unique : true,
+        trim : true,
+        // Validate email format using a regular expression 
+        validate(value) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if(!emailRegex.test(value)) {
+                throw new Error("Invalid email format");
+            }
+        }
     },
     password : {
         type : String,
-        required : true
+        required : true,
+        unique : true,
+        trim : true,
+        validate(value) {
+            if(value.length < 6) {
+                throw new Error("Password must be at least 6 characters long");
+            }
+        }
     },
-    age : Number, 
+    age : {
+        type : Number,
+        min : 1,
+        max : 80,
+        required : true,
+        validate(value){
+            if(value <=0 || value >80){
+                throw new Error("Age must be between 1 and 80");
+            }
+        }
+    }, 
     gender : {
         type : String,
         validate(value){
@@ -23,7 +48,14 @@ const userSchema = new Schema ({
             }
         }
     },
-    skills : [String]
+    skills : {
+        type: [String],
+        validate(value){
+            if(value.length > 5){
+                throw new Error("Skills cannot be more than 5");
+            }
+        }
+    }
 },
 {
     timestamps: true // Automatically adds createdAt and updatedAt fields
