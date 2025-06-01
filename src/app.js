@@ -1,8 +1,10 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const { connectToDatabase } = require('./db.js'); 
+const { connectToDatabase } = require("./db.js");
+const { signupValidation } = require("./utils/validate.js"); // Import the validation function
+const bcrypt = require("bcrypt"); // Import bcrypt for password hashing
 
-const User = require('./models/user.js');
+const User = require("./models/user.js");
 
 //const {adminAuth, userAuth} = require('./middlewares/auth'); // Import the adminAuth middleware
 //const {userAuth} = require('./middlewares/auth'); // Import the userAuth middleware
@@ -12,131 +14,139 @@ port = 7777;
 app.use(express.json()); // Middleware to parse JSON bodies given by Express.
 
 // Middleware to parse JSON bodies
-app.post('/signUp', async(req, res) => {
-
-const user = new User(req.body
-    /*{firstName: 'Lipi',
-    lastName: 'Ghosh',
-    email: 'lipi.mondal.77@gmail.com',
-    password: 'lipighosh5434',
-    age: 25,
-    gender: "Female",}*/
-    );
-
-    /*user.save().then((user) => {
+app.post("/signUp", async (req, res) => {
+  /*user.save().then((user) => {
         console.log('User saved successfully:', user);
         res.send('User signed up successfully');
     }).catch((error) => {
         console.error('Error saving user:', error);
         res.status(400).send('Error signing up user');
     });*/
+  try {
+    //! Validate the user data before saving
+    signupValidation(req.body);
 
-    try{
-        await user.save();
-        console.log('User saved successfully:', user);
-        res.send('User signed up successfully');
+    //! Encrypt the password before saving
+    const hashPassword = await bcrypt.hash(req.body.password, 8);
+    
+    const { firstName, lastName, email } = req.body; // Destructure the required fields from the request body
+
+    const user = new User(
+      ({ firstName, lastName, email, password: hashPassword }) 
+    ); // Create a new user object from the request body
+    
+    //user.password = hashPassword; // Set the hashed password
+    const existingUser = await User.find({ email: user.email });
+    if (existingUser.length > 0) {
+      throw new Error("User with this email already exists");
     }
-    catch(error) {
-        console.error('Error saving user:', error);
-        res.status(400).send('Error signing up user: '+ error.message);
-    }
+    // Save the user to the database
+    await user.save();
+    console.log("User saved successfully:", user);
+    res.send("User signed up successfully");
+  } catch (error) {
+    console.error("Error saving user:", error);
+    res.status(400).send("Error signing up user: " + error.message);
+  }
 });
 
 // Get user data
-app.get("/userdata", async (req, res) =>{
-    const userEmail = req.body.email;
+app.get("/userdata", async (req, res) => {
+  const userEmail = req.body.email;
 
-    try{
-        const userdata = await User.find({email : userEmail});
-        if(userdata.length >0){
-            res.send(userdata);
-        }
-        res.status(404).send('User not found');
-    }catch(error) {
-        console.error('Error fetching user data:', error);
-        res.status(500).send('Error fetching user data');
+  try {
+    const userdata = await User.find({ email: userEmail });
+    if (userdata.length > 0) {
+      res.send(userdata);
     }
-})
+    res.status(404).send("User not found");
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).send("Error fetching user data");
+  }
+});
 
-app.get("/feed", async (req, res) =>{
-    const userEmail = req.body.email;
+app.get("/feed", async (req, res) => {
+  const userEmail = req.body.email;
 
-    try{
-        const userdata = await User.find({email : userEmail});
-        if(userdata.length >0){
-            res.send(userdata);
-        }
-        res.status(404).send('User not found');
-    }catch(error) {
-        console.error('Error fetching user data:', error);
-        res.status(500).send('Error fetching user data');
+  try {
+    const userdata = await User.find({ email: userEmail });
+    if (userdata.length > 0) {
+      res.send(userdata);
     }
-})
+    res.status(404).send("User not found");
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).send("Error fetching user data");
+  }
+});
 
 app.delete("/deleteUser", async (req, res) => {
-    const userEmail = req.body.email;
+  const userEmail = req.body.email;
 
-    try{
-        const result = await User.findOneAndDelete({email : userEmail});
-        if(result.length === 0) {
-            return res.status(404).send('User not found');
-        }
-        console.log(result);
-        res.send(`User with email ${userEmail} deleted successfully`);
-    } catch(error) {
-        console.error('Error deleting user:', error);       
-        res.status(400).send('Error deleting user');
+  try {
+    const result = await User.findOneAndDelete({ email: userEmail });
+    if (result.length === 0) {
+      return res.status(404).send("User not found");
     }
-})
+    console.log(result);
+    res.send(`User with email ${userEmail} deleted successfully`);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(400).send("Error deleting user");
+  }
+});
 
-app.patch("/updateUser/:id", async (req, res) =>{
-    //const userEmail = req.body.email;
-    const userid = req.params?.id; //We should use req.params to get the route parameters, and UserID should not get updated in the request body, it should be passed as a route parameter.
-    const data = req.body;
+app.patch("/updateUser/:id", async (req, res) => {
+  //const userEmail = req.body.email;
+  const userid = req.params?.id; //We should use req.params to get the route parameters, and UserID should not get updated in the request body, it should be passed as a route parameter.
+  const data = req.body;
 
-    try{
+  try {
     //! Validate the update fields
-    const allowedUpdates = ['password', 'age', 'skills', 'firstName', 'lastName', "gender"];
+    const allowedUpdates = [
+      "password",
+      "age",
+      "skills",
+      "firstName",
+      "lastName",
+      "gender",
+    ];
 
-    const isUpdateAllowed = Object.keys(data).every((key)=>{
-        return allowedUpdates.includes(key);
-    })
+    const isUpdateAllowed = Object.keys(data).every((key) => {
+      return allowedUpdates.includes(key);
+    });
 
     console.log(isUpdateAllowed);
-    
-    if(!isUpdateAllowed) {
-        //return res.status(400).send('Invalid update fields');
-        throw new Error('Invalid update fields');
+
+    if (!isUpdateAllowed) {
+      //return res.status(400).send('Invalid update fields');
+      throw new Error("Invalid update fields");
     }
     /*if(data.skills.length > 5) {
         throw new Error('Skills cannot be more than 5');
     }*/
-        //await User.findByIdAndUpdate({_id : userid},{email : userEmail}, {runValidators: true}); // runValidators: true will ensure that the update operation will validate the data against the schema.
-        await User.findByIdAndUpdate({_id : userid},data, {runValidators: true});
-        res.status(200).send(`User data updated successfully`);
-    }
-    catch(error) {
-        console.error('Error updating user:', error);   
-        res.status(400).send('Error updating user' + error.message);
-    }
-}) 
-
+    //await User.findByIdAndUpdate({_id : userid},{email : userEmail}, {runValidators: true}); // runValidators: true will ensure that the update operation will validate the data against the schema.
+    await User.findByIdAndUpdate({ _id: userid }, data, {
+      runValidators: true,
+    });
+    res.status(200).send(`User data updated successfully`);
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(400).send("Error updating user" + error.message);
+  }
+});
 
 connectToDatabase()
-.then(() => {
-    console.log('Connected to MongoDB');
+  .then(() => {
+    console.log("Connected to MongoDB");
     app.listen(port, () => {
-        console.log(`Server is running on port ${port}`);
+      console.log(`Server is running on port ${port}`);
     });
-})
-.catch(error  => {
-    console.error('Error connecting to MongoDB:', error);
-})
-
-
-
-
-
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
 
 /*
 //!Order of middleware (routes) matters the most.

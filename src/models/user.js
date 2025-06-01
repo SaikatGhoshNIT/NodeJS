@@ -37,7 +37,6 @@ const userSchema = new Schema ({
         type : Number,
         min : 1,
         max : 80,
-        required : true,
         validate(value){
             if(value <=0 || value >80){
                 throw new Error("Age must be between 1 and 80");
