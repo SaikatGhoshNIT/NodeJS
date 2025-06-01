@@ -50,6 +50,37 @@ app.post("/signUp", async (req, res) => {
   }
 });
 
+//Login route
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body; // Destructure the required fields from the request body
+
+  try {
+    const user = await User.findOne({ email: email });
+    if(!user){
+        return res.status(404).send("User not found");
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if(!isPasswordMatch) {
+        return res.status(401).send("Invalid credentials");
+    }
+    
+    res.status(200).send({
+      message: "Login successful",
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        age: user.age,
+      }
+    });
+    }catch (error) { 
+    console.error("Error logging in user:", error);
+    res.status(500).send("Error logging in user: " + error.message);
+  };
+
+});
+
 // Get user data
 app.get("/userdata", async (req, res) => {
   const userEmail = req.body.email;
@@ -57,7 +88,7 @@ app.get("/userdata", async (req, res) => {
   try {
     const userdata = await User.find({ email: userEmail });
     if (userdata.length > 0) {
-      res.send(userdata);
+      return res.send(userdata);
     }
     res.status(404).send("User not found");
   } catch (error) {
@@ -72,7 +103,7 @@ app.get("/feed", async (req, res) => {
   try {
     const userdata = await User.find({ email: userEmail });
     if (userdata.length > 0) {
-      res.send(userdata);
+      return  res.send(userdata);
     }
     res.status(404).send("User not found");
   } catch (error) {
