@@ -1,5 +1,7 @@
-const {mongoose} = require('mongoose');
-const validator = require('validator'); // Import validator for validation (NPM package)
+const mongoose = require('mongoose');
+const validator = require('validator');
+const jwt = require('jsonwebtoken') // Import validator for validation (NPM package)
+const bcrypt = require('bcryptjs'); // Import bcrypt for password hashing (NPM package)
 
 const {Schema} = mongoose;
 
@@ -63,5 +65,20 @@ const userSchema = new Schema ({
 {
     timestamps: true // Automatically adds createdAt and updatedAt fields
 })
+
+userSchema.methods.getJwtToken = async function() {
+    const user = this;  // 'this' refers to the instance of the user document and arrow function don't have their own 'this'
+    const token = jwt.sign({_id: this._id}, "Dena@123", { expiresIn: "1h" })
+    return token; // Return the generated JWT token
+}
+
+userSchema.methods.comparePassword = async function(password) {
+    const user = this; // 'this' refers to the instance of the user document
+    const isMatch = await bcrypt.compare(password, this.password); 
+    if(!isMatch){
+        throw new Error("Invalid password"); // If the password does not match, throw an error
+    }// Compare the provided password with the hashed password
+    return isMatch; // Return true if the passwords match, false otherwise
+}
 
 module.exports = mongoose.model("User", userSchema);

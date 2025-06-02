@@ -64,12 +64,14 @@ app.post("/login", async (req, res) => {
         return res.status(404).send("User not found");
     }
 
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    /*const isPasswordMatch = await bcrypt.compare(password, user.password);
     if(!isPasswordMatch) {
         return res.status(401).send("Invalid credentials");
-    }
+    }*/
+    await user.comparePassword(password); // Use the method defined in the user schema to compare the password
     //! Generate a token and set it in a cookie
-    const token = jwt.sign({ _id: user._id }, "Dena@123", { expiresIn: "1h" }); //hiding the user ID in the token, expires in 1 hour
+    //const token = jwt.sign({ _id: user._id }, "Dena@123", { expiresIn: "1h" }); //hiding the user ID in the token, expires in 1 hour
+    const token = await user.getJwtToken(); // Use the method defined in the user schema to get the token
     res.cookie("token", token, {maxAge:3600000, httpOnly: true}); // Set a cookie with the user ID, expires in 1 hour
     res.status(200).send(`User ${user.firstName} logged in successfully`); // Send a success response
 
