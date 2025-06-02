@@ -5,7 +5,7 @@ const { signupValidation } = require("./utils/validate.js"); // Import the valid
 const bcrypt = require("bcrypt"); // Import bcrypt for password hashing
 const cookieParser = require("cookie-parser"); // Import cookie-parser to handle cookies
 const jwt = require("jsonwebtoken"); // Import jsonwebtoken for token generation and verification
-
+const {userAuth} = require("./middlewares/auth.js"); // Import the userAuth middleware
 const User = require("./models/user.js");
 
 //const {adminAuth, userAuth} = require('./middlewares/auth'); // Import the adminAuth middleware
@@ -68,7 +68,7 @@ app.post("/login", async (req, res) => {
     if(!isPasswordMatch) {
         return res.status(401).send("Invalid credentials");
     }
-    // Generate a token
+    //! Generate a token and set it in a cookie
     const token = jwt.sign({ _id: user._id }, "Dena@123", { expiresIn: "1h" }); //hiding the user ID in the token, expires in 1 hour
     res.cookie("token", token, {maxAge:3600000, httpOnly: true}); // Set a cookie with the user ID, expires in 1 hour
     res.status(200).send(`User ${user.firstName} logged in successfully`); // Send a success response
@@ -81,8 +81,9 @@ app.post("/login", async (req, res) => {
 });
 
 // Profile route
-app.get("/profile", async (req, res) => {
-  const token = req.cookies.token; // Get cookies from the request
+app.get("/profile",userAuth, async (req, res) => {
+  const {firstName, lastName, email, age, skills} = req.user; // Get user data from the request object
+  /*const token = req.cookies.token; // Get cookies from the request
   if (!token) {
     return res.status(401).send("Access denied. No token provided.");
   }
@@ -92,18 +93,42 @@ app.get("/profile", async (req, res) => {
     const user = await User.findById(decoded._id); // Find the user by ID from the token
     if (!user) {
       return res.status(404).send("User not found");
-    }
-    res.status(200).send({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      age: user.age,
-      skills: user.skills,}); // Send the user profile data
+    }*/
+    try{res.status(200).send({
+      firstName,
+      lastName,
+      email,
+      age,
+      skills}); // Send the user profile data
   }catch (error) {
     console.error("Error verifying token:", error);
     return res.status(400).send("Invalid token"+ error.message);
   }
 });
+
+connectToDatabase()
+  .then(() => {
+    console.log("Connected to MongoDB");
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+  });
+/*const connectToDB = async ()=>{
+  try{await connectToDatabase();
+  console.log("Connected to MongoDB"); 
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}catch(error) {
+    console.error("Error connecting to MongoDB:", error);
+  }
+}
+
+connectToDB();
+
 
 // Get user data
 app.get("/userdata", async (req, res) => {
@@ -182,7 +207,7 @@ app.patch("/updateUser/:id", async (req, res) => {
         throw new Error('Skills cannot be more than 5');
     }*/
     //await User.findByIdAndUpdate({_id : userid},{email : userEmail}, {runValidators: true}); // runValidators: true will ensure that the update operation will validate the data against the schema.
-    await User.findByIdAndUpdate({ _id: userid }, data, {
+    /*await User.findByIdAndUpdate({ _id: userid }, data, {
       runValidators: true,
     });
     res.status(200).send(`User data updated successfully`);
@@ -191,19 +216,6 @@ app.patch("/updateUser/:id", async (req, res) => {
     res.status(400).send("Error updating user" + error.message);
   }
 });
-
-connectToDatabase()
-  .then(() => {
-    console.log("Connected to MongoDB");
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
-  });
-
-/*
 //!Order of middleware (routes) matters the most.
 //! Middleware functions are executed in the order they are defined.
 
