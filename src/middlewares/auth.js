@@ -24,6 +24,8 @@ const userAuth = (req, res, next) => {
     // Here you can add logic to check if the user is authenticated
 }
 
+
+
 module.exports = {
     adminAuth,
     userAuth

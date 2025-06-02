@@ -3,6 +3,8 @@ const app = express();
 const { connectToDatabase } = require("./db.js");
 const { signupValidation } = require("./utils/validate.js"); // Import the validation function
 const bcrypt = require("bcrypt"); // Import bcrypt for password hashing
+const cookieParser = require("cookie-parser"); // Import cookie-parser to handle cookies
+const jwt = require("jsonwebtoken"); // Import jsonwebtoken for token generation and verification
 
 const User = require("./models/user.js");
 
@@ -12,6 +14,7 @@ const User = require("./models/user.js");
 port = 7777;
 
 app.use(express.json()); // Middleware to parse JSON bodies given by Express.
+app.use(cookieParser()); // Middleware to parse cookies
 
 // Middleware to parse JSON bodies
 app.post("/signUp", async (req, res) => {
@@ -55,6 +58,7 @@ app.post("/login", async (req, res) => {
   const { email, password } = req.body; // Destructure the required fields from the request body
 
   try {
+    
     const user = await User.findOne({ email: email });
     if(!user){
         return res.status(404).send("User not found");
@@ -64,21 +68,41 @@ app.post("/login", async (req, res) => {
     if(!isPasswordMatch) {
         return res.status(401).send("Invalid credentials");
     }
-    
-    res.status(200).send({
-      message: "Login successful",
-      user: {
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        age: user.age,
-      }
-    });
+    // Generate a token
+    const token = jwt.sign({ _id: user._id }, "Dena@123", { expiresIn: "1h" }); //hiding the user ID in the token, expires in 1 hour
+    res.cookie("token", token, {maxAge:3600000, httpOnly: true}); // Set a cookie with the user ID, expires in 1 hour
+    res.status(200).send(`User ${user.firstName} logged in successfully`); // Send a success response
+
     }catch (error) { 
     console.error("Error logging in user:", error);
     res.status(500).send("Error logging in user: " + error.message);
   };
 
+});
+
+// Profile route
+app.get("/profile", async (req, res) => {
+  const token = req.cookies.token; // Get cookies from the request
+  if (!token) {
+    return res.status(401).send("Access denied. No token provided.");
+  }
+  try{
+    // Verify the token
+    const decoded = jwt.verify(token, "Dena@123"); // Use the same secret used to sign the token
+    const user = await User.findById(decoded._id); // Find the user by ID from the token
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    res.status(200).send({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      age: user.age,
+      skills: user.skills,}); // Send the user profile data
+  }catch (error) {
+    console.error("Error verifying token:", error);
+    return res.status(400).send("Invalid token"+ error.message);
+  }
 });
 
 // Get user data
