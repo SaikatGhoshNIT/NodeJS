@@ -3,6 +3,9 @@ const authRouter = express.Router();
 const { signupValidation} = require("../utils/validate.js") // Import the validation function
 const bcrypt = require("bcrypt"); // Import bcrypt for password hashing
 const User = require("../models/user.js");
+const { userAuth } = require("../middlewares/auth.js"); // Import the userAuth middleware  
+const { RunCommandCursor } = require('mongodb');
+
 
 authRouter.post("/signUp", async (req, res) => {
   /*user.save().then((user) => {
@@ -26,7 +29,7 @@ authRouter.post("/signUp", async (req, res) => {
     ); // Create a new user object from the request body
     
     //user.password = hashPassword; // Set the hashed password
-    const existingUser = await User.find({ email: user.email });
+    const existingUser = await User.find({ email: user.email }); // Check if a user with the same email already exists
     if (existingUser.length > 0) {
       throw new Error("User with this email already exists");
     }
@@ -67,6 +70,16 @@ authRouter.post("/login", async (req, res) => {
     res.status(500).send("Error logging in user: " + error.message);
   };
 
+});
+
+authRouter.post("/logout", userAuth, async (req, res) => {
+  try {
+    res.clearCookie("token"); // Clear the cookie
+    res.status(200).send("User logged out successfully");
+  } catch (error) {
+    console.error("Error logging out user:", error);
+    res.status(500).send("Error logging out user: " + error.message);
+  }
 });
 
 module.exports = authRouter;

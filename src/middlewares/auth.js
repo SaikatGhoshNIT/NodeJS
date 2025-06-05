@@ -34,6 +34,7 @@ const userAuth = async (req, res, next) => {
     if(!user){
         return res.status (401).send('Unauthorized Request for User');  
     }
+    console.log("User found:", user);
     req.user = user;
     next(); //if the token is valid, pass control to the next middleware function.
 }catch(error) {

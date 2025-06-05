@@ -1,6 +1,7 @@
 const express = require('express');
 const profileRouter = express.Router();
 const {userAuth} = require("../middlewares/auth"); // Import the userAuth middleware
+const {updateValidation} = require("../utils/validate.js"); // Import the update validation function
 
 
 
@@ -30,5 +31,56 @@ profileRouter.get("/profile",userAuth, async (req, res) => {
     return res.status(400).send("Invalid token"+ error.message);
   }
 });
+
+profileRouter.patch("/profile/update", userAuth, async(req, res)=>{
+  try{
+    if(!updateValidation(req.body)) {
+      throw new Error("Invalid update fields");
+    }
+    const userExistingData = req.user; // Get the existing user data from userAuth middleware
+    const dataToUpdate = req.body; // Get the data to update from the request body
+ 
+
+    Object.keys(dataToUpdate).forEach((key)=>{
+      userExistingData[key] = dataToUpdate[key]; // Update the existing user data with the new data
+    })
+    
+    /*const updatedUser = await User.findByIdAndUpdate(   //!we can also use findByIdAndUpdate to update the user data too
+      userExistingData._id,
+      dataToUpdate,
+      { new: true, runValidators: true } // <-- runValidators here
+    );
+    if (!updatedUser) {
+      return res.status(404).send("User not found");
+    }*/
+    
+    // Save the updated user data   
+    await userExistingData.save(); // Save the updated user data to the database
+    res.json({
+      message: "User data updated successfully",
+      user: userExistingData
+  });
+      
+    res.status(200)
+
+  }
+  catch(error) {
+    return res.status(400).send("Invalid update fields: " + error.message);
+  }
+})
+
+profileRouter.delete("/profile/delete", userAuth, async(req, res)=>{
+  try{
+    const user = req.user; // Get the user data from the request object
+    await user.remove(); // Remove the user from the database
+    res.status(200).send("User deleted successfully");
+  }catch(error) {
+    return res.status(400).send("Error deleting user: " + error.message);
+  }
+})
+
+profileRouter.patch(("/profile/change-password"), userAuth, async(req, res)=>{
+  
+})
 
 module.exports = profileRouter; // Export the profile router

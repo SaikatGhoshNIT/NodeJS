@@ -1,33 +1,44 @@
-const express = require("express");
-const app = express();
-const { connectToDatabase } = require("./db.js");
-const cookieParser = require("cookie-parser"); // Import cookie-parser to handle cookies
-const authRouter = require("./routes/authRouter.js"); // Import the auth router
-const profileRouter = require("./routes/profileRouter.js"); // Import the profile router
-const connectionRequestRouter = require("./routes/connectionRequestRouter.js"); // Import the connection request router
+"use strict";
+
+var express = require("express");
+
+var app = express();
+
+var _require = require("./db.js"),
+    connectToDatabase = _require.connectToDatabase;
+
+var cookieParser = require("cookie-parser"); // Import cookie-parser to handle cookies
+
+
+var authRouter = require("./routes/authRouter.js"); // Import the auth router
+
+
+var profileRouter = require("./routes/profileRouter.js"); // Import the profile router
+
+
+var connectionRequestRouter = require("./routes/connectionRequestRouter.js"); // Import the connection request router
+
 
 port = 7777;
-
 app.use(express.json()); // Middleware to parse JSON bodies given by Express.
+
 app.use(cookieParser()); // Middleware to parse cookies
 
 app.use("/", authRouter); // Use the auth router for authentication routes
+
 app.use("/", profileRouter); // Use the profile router for profile routes
+
 app.use("/", connectionRequestRouter); // Use the connection request router for connection request routes
-
 //Connecting The Database
-connectToDatabase()
-  .then(() => {
-    console.log("Connected to MongoDB");
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
-  })
-  .catch((error) => {
-    console.error("Error connecting to MongoDB:", error);
+
+connectToDatabase().then(function () {
+  console.log("Connected to MongoDB");
+  app.listen(port, function () {
+    console.log("Server is running on port ".concat(port));
   });
-
-
+})["catch"](function (error) {
+  console.error("Error connecting to MongoDB:", error);
+});
 /*app.patch("/updateUser", userAuth, async (req, res) => {
   //const userEmail = req.body.email;
   // const userid = req.params?.id; //We should use req.params to get the route parameters, and UserID should not get updated in the request body, it should be passed as a route parameter.
@@ -160,101 +171,86 @@ app.patch("/updateUser/:id", async (req, res) => {
     /*if(data.skills.length > 5) {
         throw new Error('Skills cannot be more than 5');
     }*/
-    //await User.findByIdAndUpdate({_id : userid},{email : userEmail}, {runValidators: true}); // runValidators: true will ensure that the update operation will validate the data against the schema.
-    /*await User.findByIdAndUpdate({ _id: userid }, data, {
-      runValidators: true,
-    });
-    res.status(200).send(`User data updated successfully`);
-  } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(400).send("Error updating user" + error.message);
-  }
+//await User.findByIdAndUpdate({_id : userid},{email : userEmail}, {runValidators: true}); // runValidators: true will ensure that the update operation will validate the data against the schema.
+
+/*await User.findByIdAndUpdate({ _id: userid }, data, {
+  runValidators: true,
+});
+res.status(200).send(`User data updated successfully`);
+} catch (error) {
+console.error("Error updating user:", error);
+res.status(400).send("Error updating user" + error.message);
+}
 });
 //!Order of middleware (routes) matters the most.
 //! Middleware functions are executed in the order they are defined.
-
 //! Error handling middleware
 app.get('/getUserData', (req, res) => {
-    try {
-        //Simulating an error
-       throw new Error('Something went wrong while fetching user data');
-       res.send('Hello from User Data');
-    }
-    catch(err){
-        res.status(500).send("There is an error in your code");
-    }
+try {
+    //Simulating an error
+   throw new Error('Something went wrong while fetching user data');
+   res.send('Hello from User Data');
+}
+catch(err){
+    res.status(500).send("There is an error in your code");
+}
 })
-
 app.use("/",(err, req, res, next) => {
-    if(err){
-        //Log the error
-        res.status(500).send("Something went wrong in the server");
-    }
-    else{
-        res.send('Hello World');    
-    }
+if(err){
+    //Log the error
+    res.status(500).send("Something went wrong in the server");
+}
+else{
+    res.send('Hello World');    
+}
 })
-
 //! Handle authentication middleware for simplify the code.
 app.use("/admin", adminAuth);
-
 // Handle admin routes
 app.get("/admin/getAllData", (req, res) => {
-    res.send('Hello from Admin');
+res.send('Hello from Admin');
 });
-
 app.delete("/admin/deleteData", (req, res) => {
-    res.send('Hello from Admin DELETE');
+res.send('Hello from Admin DELETE');
 });
-
-
 app.get("/user/data", userAuth, (req, res) => { //! if we dont's have any child routes, we can use the middleware directly in the route. Where userAuth will be executed before the route handler.
-    res.send('Hello from User');
-    //res.send(`Hello from API GETAPI_ID ${req.query}`);
-    //console.log(req.query); //params is an object that contains the route parameters.
-    //res.send(`Hello from API GET with id ${req.params.id}`);
+res.send('Hello from User');
+//res.send(`Hello from API GETAPI_ID ${req.query}`);
+//console.log(req.query); //params is an object that contains the route parameters.
+//res.send(`Hello from API GET with id ${req.params.id}`);
 });
-
 //! multiple middleware functions can be used for a single route.
 app.use('/express', (req, res, next) => { //multiple middleware functions can be used for a single route.
-    console.log('Middleware for /express route');
-    next(); //next is a function that passes control to the next middleware function.
+console.log('Middleware for /express route');
+next(); //next is a function that passes control to the next middleware function.
 }, [(req, res,next) => {
-    res.send('Hello from /express route');
-    next();
+res.send('Hello from /express route');
+next();
 },
 (req, res) => {
-    console.log('This will not be executed because the response has already been sent.');
+console.log('This will not be executed because the response has already been sent.');
 }]
 );
-
 app.get("/user", (req, res) => {
-    res.send('Hello from User');
-    //res.send(`Hello from API GETAPI_ID ${req.query}`);
-    console.log(req.query); //params is an object that contains the route parameters.
-    //res.send(`Hello from API GET with id ${req.params.id}`);
+res.send('Hello from User');
+//res.send(`Hello from API GETAPI_ID ${req.query}`);
+console.log(req.query); //params is an object that contains the route parameters.
+//res.send(`Hello from API GET with id ${req.params.id}`);
 });
-
 app.use("/api", (req, res) => { //use is a method to handle all HTTP methods.
-    res.send('Hello from API');
+res.send('Hello from API');
 });
-
 app.get("/getapi", (req, res) => { //get is a method to handle GET requests.
-    res.send('Hello from API GET');
+res.send('Hello from API GET');
 });
-
-
 app.post("/postapi", (req, res) => { //post is a method to handle POST requests.
-    //We can write logic here to POST data to the server.
-    res.send('Hello from API POST');
+//We can write logic here to POST data to the server.
+res.send('Hello from API POST');
 });
-
 app.use("/",(req, res)=>{
-    res.send('Hello World');
+res.send('Hello World');
 }) // if the first middleware ("/") matches all routes, including /api, so the /api handler will never reached.
-
-
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+console.log(`Server is running on port ${port}`);
 });
 */
