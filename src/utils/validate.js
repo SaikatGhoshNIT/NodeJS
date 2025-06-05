@@ -21,6 +21,8 @@ const signupValidation = (data) => {
   } else if (!validator.isLength(skills, { max: 5 })) {
     throw new Error("You can add a maximum of 5 skills");
   }
+  
+  return true;
 };
 
 const updateValidation = (data) => {
@@ -48,7 +50,20 @@ const updateValidation = (data) => {
   }
 };
 
+const passwordValidator = (newPassword) => {
+    try{if(!newPassword) {
+      throw new Error("New password is required");
+    }
+    else if(!validator.isStrongPassword(newPassword, { minLength: 6 })) {
+      throw new Error("New password must be at least 6 characters long");
+    }
+    return true;}
+    catch(error) {
+      throw new Error("Invalid password: " + error.message);
+    }
+}
 module.exports = {
   signupValidation,
   updateValidation,
+  passwordValidator
 };

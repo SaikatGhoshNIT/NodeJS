@@ -33,6 +33,8 @@ var signupValidation = function signupValidation(data) {
   })) {
     throw new Error("You can add a maximum of 5 skills");
   }
+
+  return true;
 };
 
 var updateValidation = function updateValidation(data) {
@@ -60,7 +62,24 @@ var updateValidation = function updateValidation(data) {
   }
 };
 
+var passwordValidator = function passwordValidator(newPassword) {
+  try {
+    if (!newPassword) {
+      throw new Error("New password is required");
+    } else if (!validator.isStrongPassword(newPassword, {
+      minLength: 6
+    })) {
+      throw new Error("New password must be at least 6 characters long");
+    }
+
+    return true;
+  } catch (error) {
+    throw new Error("Invalid password: " + error.message);
+  }
+};
+
 module.exports = {
   signupValidation: signupValidation,
-  updateValidation: updateValidation
+  updateValidation: updateValidation,
+  passwordValidator: passwordValidator
 };

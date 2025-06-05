@@ -2,6 +2,9 @@ const express = require('express');
 const profileRouter = express.Router();
 const {userAuth} = require("../middlewares/auth"); // Import the userAuth middleware
 const {updateValidation} = require("../utils/validate.js"); // Import the update validation function
+const {passwordValidator} = require("../utils/validate.js"); // Import the password validation function
+const bcrypt = require("bcrypt"); // Import bcrypt for password hashing
+
 
 
 
@@ -80,7 +83,25 @@ profileRouter.delete("/profile/delete", userAuth, async(req, res)=>{
 })
 
 profileRouter.patch(("/profile/change-password"), userAuth, async(req, res)=>{
-  
+  try{
+    const currentPassword = req.user?.password; // Get the current password from the user data
+    const newPassword = req.body.password;
+
+    passwordValidator(newPassword); // Validate the new password
+
+    const hashedPassword = await bcrypt.hash(newPassword, 8); // Hash the new password
+
+    const isMatch = await bcrypt.compare(hashedPassword, currentPassword);
+    if(isMatch){
+      return res.status(400).send("New password cannot be the same as the current password");
+    }
+    currentPassword = hashedPassword; // Update the user's password with the new hashed password
+    await req.user.save(); // Save the updated user data to the database
+    res.status(200).send("Password changed successfully");  
+  }
+  catch(error) {
+    return res.status(400).send("Error changing password: " + error.message);
+  } 
 })
 
 module.exports = profileRouter; // Export the profile router
