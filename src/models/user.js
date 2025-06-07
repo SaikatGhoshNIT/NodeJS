@@ -11,6 +11,7 @@ const userSchema = new Schema ({
     email : { // Email is a required field and must be unique
         type : String,
         required : true,
+        index : true, // Create an index for faster lookups
         unique : true,
         trim : true,
         // Validate email format
@@ -94,5 +95,7 @@ userSchema.methods.comparePassword = async function(password) {
     }// Compare the provided password with the hashed password
     return isMatch; // Return true if the passwords match, false otherwise
 }
+
+userSchema.index({email:1, firstName:1, lastName:1}); // Create a compound index for email, firstName, and lastName
 
 module.exports = mongoose.model("User", userSchema);

@@ -65,7 +65,7 @@ connectionRequestRouter.post(
       // Save the connection request to the database
       const data = await connectionRequest.save();
       res.status(201).json({
-        message: "Connection request sent successfully.",
+        message: `Connection request sent successfully with status '${status}'.`,
         data: data,
       });
     } catch (error) {

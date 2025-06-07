@@ -101,7 +101,7 @@ connectionRequestRouter.post("/request/send/:status/:toUserID", userAuth, functi
         case 21:
           data = _context.sent;
           res.status(201).json({
-            message: "Connection request sent successfully.",
+            message: "Connection request sent successfully with status '".concat(status, "'."),
             data: data
           });
           _context.next = 29;

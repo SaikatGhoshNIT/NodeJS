@@ -19,6 +19,8 @@ var userSchema = new Schema({
     // Email is a required field and must be unique
     type: String,
     required: true,
+    index: true,
+    // Create an index for faster lookups
     unique: true,
     trim: true,
     // Validate email format
@@ -146,5 +148,11 @@ userSchema.methods.comparePassword = function _callee2(password) {
     }
   }, null, this);
 };
+
+userSchema.index({
+  email: 1,
+  firstName: 1,
+  lastName: 1
+}); // Create a compound index for email, firstName, and lastName
 
 module.exports = mongoose.model("User", userSchema);
