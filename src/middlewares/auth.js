@@ -34,18 +34,38 @@ const userAuth = async (req, res, next) => {
     if(!user){
         return res.status (401).send('Unauthorized Request for User');  
     }
-    console.log("User found:", user);
+    console.log("User found:", user.email);
     req.user = user;
     next(); //if the token is valid, pass control to the next middleware function.
-}catch(error) {
+    }catch(error) {
         console.error("Error in userAuth middleware:", error);
         res.status(401).send('Unauthorized Request for User:'+ error.message); //if the token is not valid, send a 401 Unauthorized response.
     }
 }
 
+const forgetPasswordAuth = async (req, res, next) => {
+    try{
+    const {email, firstName, lastName} = req.body;
+
+    if (!email || !firstName || !lastName) { //check if the required fields are present in the request body.
+        return res.status(400).send('Bad Request: Missing required fields for password reset');
+    }
+    const user = await User.findOne({email, firstName, lastName}); //find the user by email, first name and last name.
+    if (!user) {
+        return res.status(404).send('User not found'); //if the user is not found, send a 404 Not Found response.
+    }
+    console.log("User found for password reset:", user.email);
+    req.user = user; //attach the user to the request object.
+    next();} //if the user is authenticated, pass control to the next middleware function.
+    catch(error) {
+        console.error("Error in passportAuth middleware:", error);
+        res.status(401).send('Unauthorized Request for Passport Auth:'+ error.message); //if the user is not authenticated, send a 401 Unauthorized response.
+    }
+}
 
 
 module.exports = {
     adminAuth,
-    userAuth
+    userAuth,
+    forgetPasswordAuth
 };

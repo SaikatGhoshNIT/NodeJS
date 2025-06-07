@@ -42,7 +42,7 @@ var userAuth = function userAuth(req, res, next) {
           return _context.abrupt("return", res.status(401).send('Unauthorized Request for User'));
 
         case 9:
-          console.log("User found:", user);
+          console.log("User found:", user.email);
           req.user = user;
           next(); //if the token is valid, pass control to the next middleware function.
 
@@ -63,7 +63,65 @@ var userAuth = function userAuth(req, res, next) {
   }, null, null, [[0, 14]]);
 };
 
+var forgetPasswordAuth = function forgetPasswordAuth(req, res, next) {
+  var _req$body, email, firstName, lastName, user;
+
+  return regeneratorRuntime.async(function forgetPasswordAuth$(_context2) {
+    while (1) {
+      switch (_context2.prev = _context2.next) {
+        case 0:
+          _context2.prev = 0;
+          _req$body = req.body, email = _req$body.email, firstName = _req$body.firstName, lastName = _req$body.lastName;
+
+          if (!(!email || !firstName || !lastName)) {
+            _context2.next = 4;
+            break;
+          }
+
+          return _context2.abrupt("return", res.status(400).send('Bad Request: Missing required fields for password reset'));
+
+        case 4:
+          _context2.next = 6;
+          return regeneratorRuntime.awrap(User.findOne({
+            email: email,
+            firstName: firstName,
+            lastName: lastName
+          }));
+
+        case 6:
+          user = _context2.sent;
+
+          if (user) {
+            _context2.next = 9;
+            break;
+          }
+
+          return _context2.abrupt("return", res.status(404).send('User not found'));
+
+        case 9:
+          console.log("User found for password reset:", user.email);
+          req.user = user; //attach the user to the request object.
+
+          next();
+          _context2.next = 18;
+          break;
+
+        case 14:
+          _context2.prev = 14;
+          _context2.t0 = _context2["catch"](0);
+          console.error("Error in passportAuth middleware:", _context2.t0);
+          res.status(401).send('Unauthorized Request for Passport Auth:' + _context2.t0.message); //if the user is not authenticated, send a 401 Unauthorized response.
+
+        case 18:
+        case "end":
+          return _context2.stop();
+      }
+    }
+  }, null, null, [[0, 14]]);
+};
+
 module.exports = {
   adminAuth: adminAuth,
-  userAuth: userAuth
+  userAuth: userAuth,
+  forgetPasswordAuth: forgetPasswordAuth
 };

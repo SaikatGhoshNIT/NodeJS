@@ -47,11 +47,16 @@ const userSchema = new Schema ({
     }, 
     gender : {
         type : String,
-        validate(value){
+        enum :{
+            values: ['male', 'female', 'other', 'prefer not to say', "Male", "Female", "Other", "Prefer not to say"],
+            message: '{VALUE} is not a valid status'
+        },
+        default: 'prefer not to say',
+        /*validate(value){
             if(!["male", "female"].includes(value.toLowerCase())) {
                 throw new Error ("Gender must be either Male or Female")
             }
-        }
+        }*/
     },
     skills : {
         type: [String],
@@ -60,7 +65,16 @@ const userSchema = new Schema ({
                 throw new Error("Skills cannot be more than 5");
             }
         }
+    },
+    mobile :{
+        type: String,
+        validate(value) {
+            if(!validator.isMobilePhone(value, 'any', {strictMode: false})) {
+                throw new Error("Invalid mobile number format");
+            }
+        }
     }
+
 },
 {
     timestamps: true // Automatically adds createdAt and updatedAt fields

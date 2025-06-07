@@ -18,8 +18,6 @@ const signupValidation = (data) => {
     throw new Error(
       "First name and last name must be at least 2 characters long"
     );
-  } else if (!validator.isLength(skills, { max: 5 })) {
-    throw new Error("You can add a maximum of 5 skills");
   }
   
   return true;
@@ -57,7 +55,8 @@ const passwordValidator = (newPassword) => {
     else if(!validator.isStrongPassword(newPassword, { minLength: 6 })) {
       throw new Error("New password must be at least 6 characters long");
     }
-    return true;}
+    return true;
+  }
     catch(error) {
       throw new Error("Invalid password: " + error.message);
     }

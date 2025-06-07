@@ -28,10 +28,6 @@ var signupValidation = function signupValidation(data) {
     min: 2
   })) {
     throw new Error("First name and last name must be at least 2 characters long");
-  } else if (!validator.isLength(skills, {
-    max: 5
-  })) {
-    throw new Error("You can add a maximum of 5 skills");
   }
 
   return true;
