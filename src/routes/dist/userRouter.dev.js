@@ -1,16 +1,20 @@
 "use strict";
 
-var express = require('express');
+var express = require("express");
 
 var userRouter = express.Router();
 
-var _require = require('../middlewares/auth'),
+var _require = require("../middlewares/auth"),
     userAuth = _require.userAuth;
 
-var ConnectionRequest = require('../models/connectionRequest'); // Get all the pending connection requests for the logged in user
+var ConnectionRequest = require("../models/connectionRequest");
 
+var _require2 = require("../models/user"),
+    populate = _require2.populate;
 
-userRouter.get('/user/requests/recived', userAuth, function _callee(req, res) {
+var USER_SAVED_DATA = "firstName lastName age gender skills"; // Get all the pending connection requests for the logged in user
+
+userRouter.get("/user/requests/recived", userAuth, function _callee(req, res) {
   var logedInUserId, allConnectRequest;
   return regeneratorRuntime.async(function _callee$(_context) {
     while (1) {
@@ -30,8 +34,8 @@ userRouter.get('/user/requests/recived', userAuth, function _callee(req, res) {
           _context.next = 6;
           return regeneratorRuntime.awrap(ConnectionRequest.find({
             toUserId: logedInUserId,
-            status: 'interested'
-          }).populate('fromUserId', ["firstName", "lastName", "age", "gender", "skills"]));
+            status: "interested"
+          }).populate("fromUserId", ["firstName", "lastName", "age", "gender", "skills"]));
 
         case 6:
           allConnectRequest = _context.sent;
@@ -65,21 +69,73 @@ userRouter.get('/user/requests/recived', userAuth, function _callee(req, res) {
   }, null, null, [[0, 12]]);
 }); // Get all the sent connection update requests by the logged in user
 
-userRouter.get('/user/requests/sent', userAuth, function _callee2(req, res) {
+userRouter.get("/user/requests/connections", userAuth, function _callee2(req, res) {
+  var logedInUser, connections, data;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
-          try {} catch (error) {
-            console.error("Error fetching sent connection requests:", error);
-            res.status(400).send("Error fetching sent connection requests");
+          _context2.prev = 0;
+          logedInUser = req.user;
+
+          if (logedInUser) {
+            _context2.next = 4;
+            break;
           }
 
-        case 1:
+          return _context2.abrupt("return", res.status(400).send("User not authenticated"));
+
+        case 4:
+          _context2.next = 6;
+          return regeneratorRuntime.awrap(ConnectionRequest.find({
+            $and: [{
+              $or: [{
+                fromUserId: logedInUser._id
+              }, {
+                toUserId: logedInUser._id
+              }]
+            }, {
+              status: "accepted"
+            }]
+          }).populate("fromUserId", USER_SAVED_DATA).populate("toUserId", USER_SAVED_DATA));
+
+        case 6:
+          connections = _context2.sent;
+
+          if (!(!connections || connections.length === 0)) {
+            _context2.next = 9;
+            break;
+          }
+
+          return _context2.abrupt("return", res.status(404).send("No connections found"));
+
+        case 9:
+          data = connections.map(function (connection) {
+            if (connection.fromUserId._id.toString() === logedInUser._id.toString()) {
+              return connection.toUserId; // Return the toUserId data if the logged in user is the fromUserId
+            } else {
+              return connection.fromUserId; //else Return the fromUserId data if the logged in user is the toUserId
+            }
+          }); // sent only the fromUserId data
+
+          res.status(200).json({
+            message: "Connections fetched successfully",
+            connections: data
+          });
+          _context2.next = 17;
+          break;
+
+        case 13:
+          _context2.prev = 13;
+          _context2.t0 = _context2["catch"](0);
+          console.error("Error fetching sent connection requests:", _context2.t0);
+          res.status(400).send("Error fetching sent connection requests");
+
+        case 17:
         case "end":
           return _context2.stop();
       }
     }
-  });
+  }, null, null, [[0, 13]]);
 });
 module.exports = userRouter;

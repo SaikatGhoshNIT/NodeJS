@@ -12,6 +12,7 @@ var connectionRequestSchema = new mongoose.Schema({
   toUserId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    // Reference to the User model, it will connect this request with User model.
     required: true
   },
   status: {
