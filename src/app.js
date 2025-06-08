@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser"); // Import cookie-parser to handle
 const authRouter = require("./routes/authRouter.js"); // Import the auth router
 const profileRouter = require("./routes/profileRouter.js"); // Import the profile router
 const connectionRequestRouter = require("./routes/connectionRequestRouter.js"); // Import the connection request router
+const userRouter = require("./routes/userRouter.js"); // Import the user router
 
 port = 7777;
 
@@ -14,6 +15,7 @@ app.use(cookieParser()); // Middleware to parse cookies
 app.use("/", authRouter); // Use the auth router for authentication routes
 app.use("/", profileRouter); // Use the profile router for profile routes
 app.use("/", connectionRequestRouter); // Use the connection request router for connection request routes
+app.use("/", userRouter); // Use the user router for user-related routes
 
 //Connecting The Database
 connectToDatabase()

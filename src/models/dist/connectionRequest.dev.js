@@ -6,6 +6,7 @@ var connectionRequestSchema = new mongoose.Schema({
   fromUserId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    // Reference to the User model, it will connect this request with User model.
     required: true
   },
   toUserId: {
@@ -23,6 +24,10 @@ var connectionRequestSchema = new mongoose.Schema({
     "default": 'pending'
   },
   createdAt: {
+    type: Date,
+    "default": Date.now
+  },
+  updatedAt: {
     type: Date,
     "default": Date.now
   }

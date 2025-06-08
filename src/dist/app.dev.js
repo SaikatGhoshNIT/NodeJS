@@ -19,6 +19,9 @@ var profileRouter = require("./routes/profileRouter.js"); // Import the profile 
 var connectionRequestRouter = require("./routes/connectionRequestRouter.js"); // Import the connection request router
 
 
+var userRouter = require("./routes/userRouter.js"); // Import the user router
+
+
 port = 7777;
 app.use(express.json()); // Middleware to parse JSON bodies given by Express.
 
@@ -29,6 +32,8 @@ app.use("/", authRouter); // Use the auth router for authentication routes
 app.use("/", profileRouter); // Use the profile router for profile routes
 
 app.use("/", connectionRequestRouter); // Use the connection request router for connection request routes
+
+app.use("/", userRouter); // Use the user router for user-related routes
 //Connecting The Database
 
 connectToDatabase().then(function () {
