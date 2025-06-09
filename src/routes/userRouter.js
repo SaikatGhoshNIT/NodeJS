@@ -2,7 +2,7 @@ const express = require("express");
 const userRouter = express.Router();
 const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest");
-const { populate } = require("../models/user");
+const User = require("../models/user")
 
 const USER_SAVED_DATA = "firstName lastName age gender skills";
 
@@ -80,5 +80,56 @@ userRouter.get("/user/requests/connections", userAuth, async (req, res) => {
     res.status(400).send("Error fetching sent connection requests");
   }
 });
+
+
+userRouter.get("/user/feed", userAuth, async (req, res) => {
+  try{
+    const logedInUser = req.user;
+    if(!logedInUser){
+      return res.status(400).send("User not authenticated");
+    }
+    /*whome to show
+    1. all users who are not connected with the logged in user 
+    //whome to hide
+    3. hide all rejected users by logged in user
+    4. shouldn't show his own card
+    5. hide all ignored users by logged in users
+    6. hide all who are already connected or accepted
+    7. hide all who requested the user*/
+
+    const allConnections = await ConnectionRequest.find({ // Finding all connections with ignored, rejected, accepted and interested status
+      $or:[
+        {fromUserId : logedInUser._id},
+        {toUserId : logedInUser._id}
+      ]
+    }).select("fromUserId toUserId")
+
+    console.log(allConnections);
+    
+
+    const hideAllConnectionStatusUsers = new Set()
+
+    allConnections.forEach(connection =>{
+      hideAllConnectionStatusUsers.add(connection.fromUserId.toString());
+      hideAllConnectionStatusUsers.add(connection.toUserId.toString());
+    })
+    
+    console.log(hideAllConnectionStatusUsers);
+
+    const userToShow = await User.find({
+      $and: [
+        {_id: {$nin: Array.from(hideAllConnectionStatusUsers)}},
+        {_id: {$ne: logedInUser._id}}
+      ]
+    }).select(USER_SAVED_DATA)
+    
+    res.send(userToShow);
+
+  }catch(error){
+    console.error("Error fetching user feed:", error);
+    res.status(400).send("Error fetching user feed");
+  }
+
+})
 
 module.exports = userRouter;

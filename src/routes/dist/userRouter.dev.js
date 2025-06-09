@@ -9,8 +9,7 @@ var _require = require("../middlewares/auth"),
 
 var ConnectionRequest = require("../models/connectionRequest");
 
-var _require2 = require("../models/user"),
-    populate = _require2.populate;
+var User = require("../models/user");
 
 var USER_SAVED_DATA = "firstName lastName age gender skills"; // Get all the pending connection requests for the logged in user
 
@@ -137,5 +136,73 @@ userRouter.get("/user/requests/connections", userAuth, function _callee2(req, re
       }
     }
   }, null, null, [[0, 13]]);
+});
+userRouter.get("/user/feed", userAuth, function _callee3(req, res) {
+  var logedInUser, allConnections, hideAllConnectionStatusUsers, userToShow;
+  return regeneratorRuntime.async(function _callee3$(_context3) {
+    while (1) {
+      switch (_context3.prev = _context3.next) {
+        case 0:
+          _context3.prev = 0;
+          logedInUser = req.user;
+
+          if (logedInUser) {
+            _context3.next = 4;
+            break;
+          }
+
+          return _context3.abrupt("return", res.status(400).send("User not authenticated"));
+
+        case 4:
+          _context3.next = 6;
+          return regeneratorRuntime.awrap(ConnectionRequest.find({
+            // Finding all connections with ignored, rejected, accepted and interested status
+            $or: [{
+              fromUserId: logedInUser._id
+            }, {
+              toUserId: logedInUser._id
+            }]
+          }).select("fromUserId toUserId"));
+
+        case 6:
+          allConnections = _context3.sent;
+          console.log(allConnections);
+          hideAllConnectionStatusUsers = new Set();
+          allConnections.forEach(function (connection) {
+            hideAllConnectionStatusUsers.add(connection.fromUserId.toString());
+            hideAllConnectionStatusUsers.add(connection.toUserId.toString());
+          });
+          console.log(hideAllConnectionStatusUsers);
+          _context3.next = 13;
+          return regeneratorRuntime.awrap(User.find({
+            $and: [{
+              _id: {
+                $nin: Array.from(hideAllConnectionStatusUsers)
+              }
+            }, {
+              _id: {
+                $ne: logedInUser._id
+              }
+            }]
+          }).select(USER_SAVED_DATA));
+
+        case 13:
+          userToShow = _context3.sent;
+          res.send(userToShow);
+          _context3.next = 21;
+          break;
+
+        case 17:
+          _context3.prev = 17;
+          _context3.t0 = _context3["catch"](0);
+          console.error("Error fetching user feed:", _context3.t0);
+          res.status(400).send("Error fetching user feed");
+
+        case 21:
+        case "end":
+          return _context3.stop();
+      }
+    }
+  }, null, null, [[0, 17]]);
 });
 module.exports = userRouter;
