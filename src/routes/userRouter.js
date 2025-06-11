@@ -83,6 +83,12 @@ userRouter.get("/user/requests/connections", userAuth, async (req, res) => {
 
 
 userRouter.get("/user/feed", userAuth, async (req, res) => {
+
+  const page = parseInt(req.query.page) || 1;
+  let limit = parseInt(req.query.limit) || 10;
+  limit = limit > 50 ? 50 : limit;
+  const skip = (page-1)*limit;
+
   try{
     const logedInUser = req.user;
     if(!logedInUser){
@@ -104,7 +110,7 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
       ]
     }).select("fromUserId toUserId")
 
-    console.log(allConnections);
+    //console.log(allConnections);
     
 
     const hideAllConnectionStatusUsers = new Set()
@@ -114,14 +120,14 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
       hideAllConnectionStatusUsers.add(connection.toUserId.toString());
     })
     
-    console.log(hideAllConnectionStatusUsers);
+    //console.log(hideAllConnectionStatusUsers);
 
-    const userToShow = await User.find({
+    const userToShow = await User.find({ // hiding all users from connection table and own userIdis this manada - Saikat
       $and: [
         {_id: {$nin: Array.from(hideAllConnectionStatusUsers)}},
         {_id: {$ne: logedInUser._id}}
       ]
-    }).select(USER_SAVED_DATA)
+    }).select(USER_SAVED_DATA).skip(skip).limit(limit); //skip and limit are two functions given by mongoDb to handel pagination cases
     
     res.send(userToShow);
 

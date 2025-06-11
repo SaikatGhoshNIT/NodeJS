@@ -138,23 +138,27 @@ userRouter.get("/user/requests/connections", userAuth, function _callee2(req, re
   }, null, null, [[0, 13]]);
 });
 userRouter.get("/user/feed", userAuth, function _callee3(req, res) {
-  var logedInUser, allConnections, hideAllConnectionStatusUsers, userToShow;
+  var page, limit, skip, logedInUser, allConnections, hideAllConnectionStatusUsers, userToShow;
   return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
       switch (_context3.prev = _context3.next) {
         case 0:
-          _context3.prev = 0;
+          page = parseInt(req.query.page) || 1;
+          limit = parseInt(req.query.limit) || 10;
+          limit = limit > 50 ? 50 : limit;
+          skip = (page - 1) * limit;
+          _context3.prev = 4;
           logedInUser = req.user;
 
           if (logedInUser) {
-            _context3.next = 4;
+            _context3.next = 8;
             break;
           }
 
           return _context3.abrupt("return", res.status(400).send("User not authenticated"));
 
-        case 4:
-          _context3.next = 6;
+        case 8:
+          _context3.next = 10;
           return regeneratorRuntime.awrap(ConnectionRequest.find({
             // Finding all connections with ignored, rejected, accepted and interested status
             $or: [{
@@ -164,17 +168,18 @@ userRouter.get("/user/feed", userAuth, function _callee3(req, res) {
             }]
           }).select("fromUserId toUserId"));
 
-        case 6:
+        case 10:
           allConnections = _context3.sent;
-          console.log(allConnections);
+          //console.log(allConnections);
           hideAllConnectionStatusUsers = new Set();
           allConnections.forEach(function (connection) {
             hideAllConnectionStatusUsers.add(connection.fromUserId.toString());
             hideAllConnectionStatusUsers.add(connection.toUserId.toString());
-          });
-          console.log(hideAllConnectionStatusUsers);
-          _context3.next = 13;
+          }); //console.log(hideAllConnectionStatusUsers);
+
+          _context3.next = 15;
           return regeneratorRuntime.awrap(User.find({
+            // hiding all users from connection table and own userIdis this manada - Saikat
             $and: [{
               _id: {
                 $nin: Array.from(hideAllConnectionStatusUsers)
@@ -184,25 +189,26 @@ userRouter.get("/user/feed", userAuth, function _callee3(req, res) {
                 $ne: logedInUser._id
               }
             }]
-          }).select(USER_SAVED_DATA));
+          }).select(USER_SAVED_DATA).skip(skip).limit(limit));
 
-        case 13:
+        case 15:
           userToShow = _context3.sent;
+          //skip and limit are two functions given by mongoDb to handel pagination cases
           res.send(userToShow);
-          _context3.next = 21;
+          _context3.next = 23;
           break;
 
-        case 17:
-          _context3.prev = 17;
-          _context3.t0 = _context3["catch"](0);
+        case 19:
+          _context3.prev = 19;
+          _context3.t0 = _context3["catch"](4);
           console.error("Error fetching user feed:", _context3.t0);
           res.status(400).send("Error fetching user feed");
 
-        case 21:
+        case 23:
         case "end":
           return _context3.stop();
       }
     }
-  }, null, null, [[0, 17]]);
+  }, null, null, [[4, 19]]);
 });
 module.exports = userRouter;
