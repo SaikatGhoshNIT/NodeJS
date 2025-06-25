@@ -2,6 +2,8 @@
 
 var express = require("express");
 
+var cors = require('cors');
+
 var app = express();
 
 var _require = require("./db.js"),
@@ -23,6 +25,8 @@ var userRouter = require("./routes/userRouter.js"); // Import the user router
 
 
 port = 7777;
+app.use(cors()); // Enable CORS for all routes
+
 app.use(express.json()); // Middleware to parse JSON bodies given by Express.
 
 app.use(cookieParser()); // Middleware to parse cookies

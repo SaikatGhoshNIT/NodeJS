@@ -1,4 +1,5 @@
 const express = require("express");
+var cors = require('cors')
 const app = express();
 const { connectToDatabase } = require("./db.js");
 const cookieParser = require("cookie-parser"); // Import cookie-parser to handle cookies
@@ -7,8 +8,10 @@ const profileRouter = require("./routes/profileRouter.js"); // Import the profil
 const connectionRequestRouter = require("./routes/connectionRequestRouter.js"); // Import the connection request router
 const userRouter = require("./routes/userRouter.js"); // Import the user router
 
+
 port = 7777;
 
+app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware to parse JSON bodies given by Express.
 app.use(cookieParser()); // Middleware to parse cookies
 

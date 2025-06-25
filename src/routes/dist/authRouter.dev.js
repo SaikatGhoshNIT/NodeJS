@@ -129,8 +129,18 @@ authRouter.post("/login", function _callee2(req, res) {
             httpOnly: true
           }); // Set a cookie with the user ID, expires in 1 hour
 
-          res.status(200).send("User ".concat(user.firstName, " logged in successfully")); // Send a success response
-
+          res.status(200).json({
+            // Send a success response
+            message: "User logged in successfully",
+            user: {
+              _id: user._id,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              email: user.email,
+              age: user.age,
+              skills: user.skills
+            }
+          });
           _context2.next = 20;
           break;
 

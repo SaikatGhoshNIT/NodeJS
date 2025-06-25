@@ -63,8 +63,17 @@ authRouter.post("/login", async (req, res) => {
     //const token = jwt.sign({ _id: user._id }, "Dena@123", { expiresIn: "1h" }); //hiding the user ID in the token, expires in 1 hour
     const token = await user.getJwtToken(); // Use the method defined in the user schema to get the token
     res.cookie("token", token, {maxAge:3600000, httpOnly: true}); // Set a cookie with the user ID, expires in 1 hour
-    res.status(200).send(`User ${user.firstName} logged in successfully`); // Send a success response
-
+    res.status(200).json({  // Send a success response
+      message: "User logged in successfully",
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        age: user.age,
+        skills: user.skills,
+    }
+  });
     }catch (error) { 
     console.error("Error logging in user:", error);
     res.status(500).send("Error logging in user: " + error.message);
