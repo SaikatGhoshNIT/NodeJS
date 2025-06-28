@@ -25,7 +25,12 @@ var userRouter = require("./routes/userRouter.js"); // Import the user router
 
 
 port = 7777;
-app.use(cors()); // Enable CORS for all routes
+app.use(cors({
+  origin: "http://localhost:5173",
+  // Allow requests from this origin
+  credentials: true // Allow cookies to be sent with requests
+
+})); // Enable CORS for all routes
 
 app.use(express.json()); // Middleware to parse JSON bodies given by Express.
 
