@@ -11,6 +11,8 @@ const userRouter = require("./routes/userRouter.js"); // Import the user router
 
 port = 7777;
 
+
+// Middleware to enable CORS
 app.use(cors({
   origin: "http://localhost:5173", // Allow requests from this origin
   credentials: true, // Allow cookies to be sent with requests
