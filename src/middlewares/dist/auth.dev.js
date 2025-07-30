@@ -26,41 +26,50 @@ var userAuth = function userAuth(req, res, next) {
         case 0:
           _context.prev = 0;
           token = req.cookies.token;
+
+          if (token) {
+            _context.next = 4;
+            break;
+          }
+
+          return _context.abrupt("return", res.status(403).send('Unauthorized Request for User: No token provided'));
+
+        case 4:
           console.log("User auth is getting checked...");
           decodedToken = jwt.verify(token, "Dena@123");
-          _context.next = 6;
+          _context.next = 8;
           return regeneratorRuntime.awrap(User.findById(decodedToken._id));
 
-        case 6:
+        case 8:
           user = _context.sent;
 
           if (user) {
-            _context.next = 9;
+            _context.next = 11;
             break;
           }
 
           return _context.abrupt("return", res.status(401).send('Unauthorized Request for User'));
 
-        case 9:
+        case 11:
           console.log("User found:", user.email);
           req.user = user;
           next(); //if the token is valid, pass control to the next middleware function.
 
-          _context.next = 18;
+          _context.next = 20;
           break;
 
-        case 14:
-          _context.prev = 14;
+        case 16:
+          _context.prev = 16;
           _context.t0 = _context["catch"](0);
           console.error("Error in userAuth middleware:", _context.t0);
           res.status(401).send('Unauthorized Request for User:' + _context.t0.message); //if the token is not valid, send a 401 Unauthorized response.
 
-        case 18:
+        case 20:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[0, 14]]);
+  }, null, null, [[0, 16]]);
 };
 
 var forgetPasswordAuth = function forgetPasswordAuth(req, res, next) {

@@ -27,6 +27,9 @@ const userAuth = async (req, res, next) => {
     // Here you can add logic to check if the user is authenticated
     try{
     const {token} = req.cookies;
+    if (!token) {
+        return res.status(403).send('Unauthorized Request for User: No token provided'); //if no token is provided, send a 401 Unauthorized response.
+    }
     console.log("User auth is getting checked...");
     const decodedToken = jwt.verify(token, "Dena@123");
 
