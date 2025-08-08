@@ -111,9 +111,7 @@ authRouter.post("/login", function _callee2(req, res) {
             break;
           }
 
-          return _context2.abrupt("return", res.status(403).json({
-            message: "Invalid Credentials!!!"
-          }));
+          return _context2.abrupt("return", res.status(403).send("Invalid credentials"));
 
         case 7:
           _context2.next = 9;

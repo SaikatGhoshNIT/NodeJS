@@ -51,7 +51,7 @@ authRouter.post("/login", async (req, res) => {
     
     const user = await User.findOne({ email: email });
     if(!user){
-        return res.status(403).json({ message: "Invalid Credentials!!!" });
+        return res.status(403).send("Invalid credentials"); // Changed status code to 403 for invalid credentials
     }
 
     /*const isPasswordMatch = await bcrypt.compare(password, user.password);
